@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SCRIPTDIR=$PWD
-[[ -e openvpn.sh ]] || {echo >$2 "Please CD into the simple-openvpn-setup directory before running this script."}
+[[ -e openvpn.sh ]] || {echo >$2 "Please CD into the simple-openvpn-server directory before running this script."}
 
 # defaults
 ADMINPASSWORD="secret"
@@ -300,6 +300,6 @@ service lighttpd restart
 
 # Install status parse script
 apt-get install python-pip
-pip install -r $SCRIPTDIR/requirements.txt
-cp openvpn-status-parse.py /usr/local/bin/
+pip install -r $SCRIPTDIR"/requirements.txt"
+cp $SCRIPTDIR"/openvpn-status-parse.py" /usr/local/bin/
 

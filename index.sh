@@ -23,7 +23,7 @@ echo "<div class=\"panel-heading\">Connected Clients</div>"
 #cat /etc/openvpn/ipp.txt | sed 's@\(.*\)@<li>\1</li>@'
 #echo "</ul>"
 
-/home/mhanheide/.local/bin/openvpn-status-parse.py
+/usr/local/bin/openvpn-status-parse.py
 
 echo "</div>"
 echo "<div class=\"panel panel-danger\">"

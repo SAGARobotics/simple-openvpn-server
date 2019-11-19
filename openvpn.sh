@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SCRIPTDIR=$PWD
+[[ -e openvpn.sh ]] || {echo >$2 "Please CD into the simple-openvpn-setup directory before running this script."}
+
 # defaults
 ADMINPASSWORD="secret"
 DNS1="8.8.8.8"
@@ -274,17 +277,17 @@ chmod 744 /etc/lighttpd/ssl/server.pem
 #Configure the web server with the lighttpd.conf from GitHub
 mv /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf.$$
 #wget -O /etc/lighttpd/lighttpd.conf https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/lighttpd.conf
-cp lighttpd.conf /etc/lighttpd/lighttpd.conf
+cp $SCRIPTDIR"/lighttpd.conf" /etc/lighttpd/lighttpd.conf
 
 #install the webserver scripts
 rm /var/www/html/*
-cp index.sh /var/www/html/index.sh
+cp $SCRIPTDIR"/index.sh" /var/www/html/index.sh
 #wget -O /var/www/html/index.sh https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/index.sh
 
 #wget -O /var/www/html/download.sh https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/download.sh
-cp download.sh /var/www/html/download.sh
-cp admin.sh /var/www/html/admin.sh
-cp hosts.sh /var/www/html/hosts.sh
+cp $SCRIPTDIR"/download.sh" /var/www/html/download.sh
+cp $SCRIPTDIR"/admin.sh" /var/www/html/admin.sh
+cp $SCRIPTDIR"/hosts.sh" /var/www/html/hosts.sh
 
 chown -R www-data:www-data /var/www/html/
 
@@ -297,6 +300,6 @@ service lighttpd restart
 
 # Install status parse script
 apt-get install python-pip
-pip install -r requirements.txt
+pip install -r $SCRIPTDIR/requirements.txt
 cp openvpn-status-parse.py /usr/local/bin/
 

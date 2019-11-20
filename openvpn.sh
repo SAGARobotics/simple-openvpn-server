@@ -1,6 +1,9 @@
 #!/bin/bash
 
-# defaults 
+SCRIPTDIR=$PWD
+[[ -e openvpn.sh ]] || {echo >$2 "Please CD into the simple-openvpn-server directory before running this script."}
+
+# defaults
 ADMINPASSWORD="secret"
 DNS1="8.8.8.8"
 DNS2="8.8.4.4"
@@ -48,10 +51,10 @@ if [[ "$EUID" -ne 0 ]]; then
 	exit 2
 fi
 
-if [[ ! -e /dev/net/tun ]]; then
-	echo "The TUN device is not available. You need to enable TUN before running this script."
-	exit 3
-fi
+#if [[ ! -e /dev/net/tun ]]; then
+#	echo "The TUN device is not available. You need to enable TUN before running this script."
+#	exit 3
+#fi
 
 if grep -qs "CentOS release 5" "/etc/redhat-release"; then
 	echo "CentOS 5 is too old and not supported"
@@ -135,11 +138,11 @@ tls-auth ta.key 0
 topology subnet
 server 10.8.0.0 255.255.255.0
 ifconfig-pool-persist ipp.txt" > /etc/openvpn/server.conf
-echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
+#echo 'push "redirect-gateway def1 bypass-dhcp"' >> /etc/openvpn/server.conf
 
 # DNS
-echo "push \"dhcp-option DNS $DNS1\"" >> /etc/openvpn/server.conf
-echo "push \"dhcp-option DNS $DNS2\"" >> /etc/openvpn/server.conf
+#echo "push \"dhcp-option DNS $DNS1\"" >> /etc/openvpn/server.conf
+#echo "push \"dhcp-option DNS $DNS2\"" >> /etc/openvpn/server.conf
 echo "keepalive 10 120
 cipher AES-256-CBC
 
@@ -149,6 +152,10 @@ persist-key
 persist-tun
 status openvpn-status.log
 verb 3
+
+;duplicate-cn
+client-to-client
+
 crl-verify crl.pem" >> /etc/openvpn/server.conf
 
 # Enable net.ipv4.ip_forward for the system
@@ -268,17 +275,30 @@ chmod 744 /etc/lighttpd/ssl/server.pem
 
 #Configure the web server with the lighttpd.conf from GitHub
 mv /etc/lighttpd/lighttpd.conf /etc/lighttpd/lighttpd.conf.$$
-wget -O /etc/lighttpd/lighttpd.conf https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/lighttpd.conf
+#wget -O /etc/lighttpd/lighttpd.conf https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/lighttpd.conf
+cp $SCRIPTDIR"/lighttpd.conf" /etc/lighttpd/lighttpd.conf
 
 #install the webserver scripts
 rm /var/www/html/*
-wget -O /var/www/html/index.sh https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/index.sh
+cp $SCRIPTDIR"/index.sh" /var/www/html/index.sh
+#wget -O /var/www/html/index.sh https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/index.sh
 
-wget -O /var/www/html/download.sh https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/download.sh
+#wget -O /var/www/html/download.sh https://raw.githubusercontent.com/theonemule/simple-openvpn-server/master/download.sh
+cp $SCRIPTDIR"/download.sh" /var/www/html/download.sh
+cp $SCRIPTDIR"/admin.sh" /var/www/html/admin.sh
+cp $SCRIPTDIR"/hosts.sh" /var/www/html/hosts.sh
+
 chown -R www-data:www-data /var/www/html/
+
 
 #set the password file for the WWW logon
 echo "admin:$ADMINPASSWORD" >> /etc/lighttpd/.lighttpdpassword
 
 #restart the web server
 service lighttpd restart
+
+# Install status parse script
+apt-get install python-pip
+pip install -r $SCRIPTDIR"/requirements.txt"
+cp $SCRIPTDIR"/openvpn-status-parse.py" /usr/local/bin/
+
